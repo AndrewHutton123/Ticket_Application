@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form";
 import { ticketSchema } from "@/ValidationSchemas/ticket";
 import { z } from "zod";
@@ -15,15 +15,44 @@ import {
   SelectContent,
   SelectItem,
 } from "./ui/select";
+import { Button } from "./ui/button";
+import axios from "axios";
+import { Ticket } from "@prisma/client";
+import { useRouter } from "next/navigation";
 
 type TicketFormData = z.infer<typeof ticketSchema>;
+type Props = {
+  ticket?: Ticket;
+};
 
-const TicketForm = () => {
+const TicketForm = ({ ticket }: Props) => {
   const form = useForm<TicketFormData>({
     resolver: zodResolver(ticketSchema),
   });
 
-  async function onSubmit(values: TicketFormData) {}
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
+
+  async function onSubmit(values: TicketFormData) {
+    try {
+      setIsSubmitting(true);
+      setError("");
+
+      if (ticket) {
+        await axios.patch("/api/tickets/" + ticket.id, values);
+      } else {
+        await axios.post("/api/tickets", values);
+      }
+
+      router.push("/tickets");
+
+      router.refresh();
+    } catch (error) {
+      setError("Unknown Error Occured");
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <div className="rounded-md border w-full p-4">
@@ -35,6 +64,7 @@ const TicketForm = () => {
           <FormField
             control={form.control}
             name="title"
+            defaultValue={ticket?.title}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Ticket Title</FormLabel>
@@ -47,6 +77,7 @@ const TicketForm = () => {
           <Controller
             name="description"
             control={form.control}
+            defaultValue={ticket?.description}
             render={({ field }) => (
               <SimpleMdeReact placeholder="Description" {...field} />
             )}
@@ -54,6 +85,7 @@ const TicketForm = () => {
           <div className="flex w-full space-x-4">
             <FormField
               control={form.control}
+              defaultValue={ticket?.status}
               name="status"
               render={({ field }) => (
                 <FormItem>
@@ -64,7 +96,10 @@ const TicketForm = () => {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Status..." />
+                        <SelectValue
+                          placeholder="Status..."
+                          defaultValue={ticket?.status}
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -78,6 +113,7 @@ const TicketForm = () => {
             />
             <FormField
               control={form.control}
+              defaultValue={ticket?.priority}
               name="priority"
               render={({ field }) => (
                 <FormItem>
@@ -88,7 +124,10 @@ const TicketForm = () => {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Priority..." />
+                        <SelectValue
+                          placeholder="Priority..."
+                          defaultValue={ticket?.priority}
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -101,6 +140,9 @@ const TicketForm = () => {
               )}
             />
           </div>
+          <Button type="submit" disabled={isSubmitting}>
+            {ticket ? "Update Ticket" : "Create Ticket"}
+          </Button>
         </form>
       </Form>
     </div>
