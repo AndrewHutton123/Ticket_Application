@@ -43,14 +43,14 @@ const Pagination = ({ itemCount, pageSize, currentPage }: Props) => {
         <Button
           variant="outline"
           disabled={currentPage === 1}
-          onClick={() => changePage(currentPage + 1)}
+          onClick={() => changePage(currentPage - 1)}
         >
           <ChevronLeft />
         </Button>
         <Button
           variant="outline"
           disabled={currentPage === pageCount}
-          onClick={() => changePage(currentPage - 1)}
+          onClick={() => changePage(currentPage + 1)}
         >
           <ChevronRight />
         </Button>
