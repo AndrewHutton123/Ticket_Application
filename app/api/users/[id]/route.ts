@@ -9,7 +9,7 @@ type Props = {
 };
 
 export async function PATCH(request: NextRequest, { params }: Props) {
-  const body: User = await request.json();
+  const body = await request.json();
   const validation = userSchema.safeParse(body);
 
   if (!validation.success) {
@@ -27,10 +27,9 @@ export async function PATCH(request: NextRequest, { params }: Props) {
   if (body?.password && body.password !== "") {
     const hashPassword = await bcrypt.hash(body.password, 10);
     body.password = hashPassword;
+  } else {
+    delete body.password;
   }
-  //  else {
-  //   delete body.password;
-  // }
 
   if (user.username !== body.username) {
     const duplicateUsername = await prisma.user.findUnique({
