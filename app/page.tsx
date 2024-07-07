@@ -40,9 +40,7 @@ const Dashboard = async () => {
         <div>
           <DashRecentTickets tickets={tickets} />
         </div>
-        <div>
-          <DashChart data={data} />
-        </div>
+        <div>{/* <DashChart data={data} /> */}</div>
       </div>
     </div>
   );
